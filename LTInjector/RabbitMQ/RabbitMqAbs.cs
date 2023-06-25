@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
 
-namespace LTRuleEngine.RabbitMQ
+namespace LTInjector.RabbitMQ
 {
     public abstract class RabbitMqAbs
     {

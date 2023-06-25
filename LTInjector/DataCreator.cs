@@ -1,5 +1,4 @@
-﻿using EltaParser;
-using LTRuleEngine.RabbitMQ;
+﻿using LTInjector.RabbitMQ;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,26 +8,25 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace EltaDataSimulator
+namespace LTInjector
 {
     internal class DataCreator
     {
-        static int x = 750;
-        static int y = 500;
-        static int z = 1000;
+        static readonly int x = 750;
+        static readonly int y = 500;
+        static readonly int z = 1000;
 
-        static int speed = 850;
-
-        static int msgAmount = 600;
+        static readonly int speed = 850;
 
         static int id = 1;
-        public static void send2Rabbit()
+
+        //static RabbitMqSender rabbitMQHandler = new RabbitMqSender(Constants.RAW_FLIGHTS_EXCHANGE);
+         RabbitMqSender rabbitMQSender = (RabbitMqSender)RabbitMqFactory.Instance.create(Constants.SENDER, Constants.RAW_FLIGHTS_EXCHANGE);
+
+
+        public  void send2Rabbit()
         {
             
-            RabbitMqSender rabbitMQHandler = new RabbitMqSender("flights");
-
-
-
             int secondsCounter = 0;
 
             while (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.X))
@@ -42,16 +40,13 @@ namespace EltaDataSimulator
                 foreach (byte[] body in arrayList)
                 {
                     listCount++;
-                    //byte[] body = arrayList[i];
-                    rabbitMQHandler.Send(body);//.Send("flights", "#", body);
+                    rabbitMQSender.Send(body);
 
                 }
 
                 DateTime endTime = DateTime.Now;
 
                 TimeSpan ts = (endTime - startTime);
-
-
 
                 //Console.WriteLine("Elapsed Time is {0} ms", ts.TotalMilliseconds);
 
@@ -63,10 +58,8 @@ namespace EltaDataSimulator
                 }
 
                 secondsCounter++;
-                // if ((secondsCounter % 1) == 0)
-                //{
+
                 Console.WriteLine("Processed {0} during {1} seconds", listCount * secondsCounter, secondsCounter);
-                // }
 
 
 
@@ -80,7 +73,7 @@ namespace EltaDataSimulator
 
 
 
-            for (int i = 0; i < msgAmount; i++)
+            for (int i = 0; i < Constants.MSG_PER_SEC; i++)
             {
                 int newX = x, newY = y, newZ = z;
                 JsonObject flightJson = new JsonObject();
