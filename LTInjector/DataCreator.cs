@@ -134,7 +134,7 @@ namespace LTInjector
                 flightJson.Add("altitude", newZ);
 
                 flightJson.Add("speed", speed);
-                Console.WriteLine(flightJson.ToString());
+                // Console.WriteLine(flightJson.ToString());
 
                 byte[] body = Encoding.Default.GetBytes(flightJson.ToString());
                 arrayList.Add(body);
