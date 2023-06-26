@@ -12,19 +12,27 @@ namespace LTInjector
 {
     internal class DataCreator
     {
-        static readonly int x = 750;
-        static readonly int y = 500;
-        static readonly int z = 1000;
+        //static readonly double x = 0.5;
+        //static readonly double y = 1.5;
+        static readonly double z = 1000;
 
         static readonly int speed = 850;
 
         static int id = 1;
 
-        //static RabbitMqSender rabbitMQHandler = new RabbitMqSender(Constants.RAW_FLIGHTS_EXCHANGE);
-         RabbitMqSender rabbitMQSender = (RabbitMqSender)RabbitMqFactory.Instance.create(Constants.SENDER, Constants.RAW_FLIGHTS_EXCHANGE);
+        List<Point> intPoints;
+        List<Point> extPoints;
 
 
-        public  void send2Rabbit()
+        RabbitMqSender rabbitMQSender = (RabbitMqSender)RabbitMqFactory.Instance.getInstance(Constants.SENDER, Constants.RAW_FLIGHTS_EXCHANGE);
+
+
+        public DataCreator()
+        {
+            intPoints = createIntPoints();
+            extPoints = createExtPoints();
+        }
+        public void send2Rabbit()
         {
             
             int secondsCounter = 0;
@@ -34,6 +42,7 @@ namespace LTInjector
 
                 List<byte[]> arrayList = createData();
                 DateTime startTime = DateTime.Now;
+
 
                 // Console.WriteLine("arrayList " + arrayList.Count);
                 int listCount = 0;
@@ -66,38 +75,66 @@ namespace LTInjector
             }
         }
 
-        private static List<byte[]> createData()
+        private  List<byte[]> createData()
         {
 
             List<byte[]> arrayList = new List<byte[]>();
 
 
-
+            int intPointsIndex = 0;
+            int outPointsIndex = 0;
             for (int i = 0; i < Constants.MSG_PER_SEC; i++)
             {
-                int newX = x, newY = y, newZ = z;
+                double newX = 0;
+                double newY = 0;
+                double newZ = z;
+
+
                 JsonObject flightJson = new JsonObject();
-                if ((id % 10) == 0)
+                if ((id % 15) == 0)
                 {
                     newZ = 1001;
                 }
-                else if ((id % 5) == 0)
+                else if ((id % 10) == 0)
                 {
                     newX = 42;
                     newY = 42;
                 }
+                else if ((id % 5) == 0)
+                {
+                    
+                    Point p = intPoints[intPointsIndex];
+                    newX = p.X;
+                    newY = p.Y;
+
+                    if (++intPointsIndex >= intPoints.Count )
+                    {
+                        intPointsIndex = 0;
+                    }
+                }
+                else
+                {
+                  
+                    Point p = extPoints[outPointsIndex];
+                    newX = p.X;
+                    newY = p.Y;
+                    if (++outPointsIndex >= extPoints.Count)
+                    {
+                        outPointsIndex = 0;
+                    }
+                }
+
 
                 flightJson.Add("Id", id++);
-
                 flightJson.Add("location", new JsonObject()
-                    {
-                        { "longitude", newX },
-                        { "latitude", newY },
-                        { "altitude", newZ }
-                    });
+                  {   {"type", "Point"},
+                      { "coordinates", new JsonArray() { newX, newY } },
+
+                  });
+                flightJson.Add("altitude", newZ);
 
                 flightJson.Add("speed", speed);
-                //Console.WriteLine(flightJson.ToString());
+                Console.WriteLine(flightJson.ToString());
 
                 byte[] body = Encoding.Default.GetBytes(flightJson.ToString());
                 arrayList.Add(body);
@@ -106,6 +143,30 @@ namespace LTInjector
             return arrayList;
 
 
+        }
+
+        private List<Point> createIntPoints()
+        {
+            List<Point> points = new List<Point>();
+
+            points.Add(new Point(1.5, 1.5));
+            points.Add(new Point(1.5, 2));
+            points.Add(new Point(1.5, 1));
+
+            return points;
+
+        }
+
+        private List<Point> createExtPoints()
+        {
+            List<Point> points = new List<Point>();
+
+            points.Add(new Point(0.5, 1.5));
+            points.Add(new Point(1.5, 2.5));
+            points.Add(new Point(1.5, 3));
+            points.Add(new Point(1.5, 0.5));
+
+            return points;
         }
     }
 }

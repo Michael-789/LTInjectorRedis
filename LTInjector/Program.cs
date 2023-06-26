@@ -10,7 +10,7 @@ if (start == 1)
     Console.WriteLine("Press X to stop");
 
 
-    RabbitMqReceiver rabbitMQReceiver = (RabbitMqReceiver)RabbitMqFactory.Instance.create(Constants.RECIEVER, Constants.ALERTS_EXCHANGE);
+    RabbitMqReceiver rabbitMQReceiver = (RabbitMqReceiver)RabbitMqFactory.Instance.getInstance(Constants.RECIEVER, Constants.ALERTS_EXCHANGE);
 
         //new RabbitMqReceiver(Constants.ALERTS_EXCHANGE);
     var alert = new Alert();

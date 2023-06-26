@@ -22,7 +22,7 @@ namespace LTInjector.RabbitMQ
                 return instance;
             }
         }
-        public RabbitMqAbs create(string rabbitType,string exchange )
+        public RabbitMqAbs? getInstance(string rabbitType,string exchange )
         {
             if( rabbitType == Constants.SENDER )
             {
@@ -32,10 +32,9 @@ namespace LTInjector.RabbitMQ
             {
                 return  RabbitMqReceiver.getInstance(exchange);
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
+            
             
         }
     }
