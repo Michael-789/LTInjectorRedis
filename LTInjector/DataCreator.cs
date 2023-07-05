@@ -20,19 +20,23 @@ namespace LTInjector
 
         static int id = 1;
 
+        static int alertscounter = 0;
+
         List<Point> intPoints;
         List<Point> extPoints;
 
+        ReddisHandler reddis;
 
-        RabbitMqSender rabbitMQSender = (RabbitMqSender)RabbitMqFactory.Instance.getInstance(Constants.SENDER, Constants.RAW_FLIGHTS_EXCHANGE);
+        // RabbitMqSender rabbitMQSender = (RabbitMqSender)RabbitMqFactory.Instance.getInstance(Constants.SENDER, Constants.RAW_FLIGHTS_EXCHANGE);
 
 
         public DataCreator()
         {
             intPoints = createIntPoints();
             extPoints = createExtPoints();
+            reddis = new ReddisHandler();
         }
-        public void send2Rabbit()
+   /*     public void send2Rabbit()
         {
             
             int secondsCounter = 0;
@@ -40,7 +44,7 @@ namespace LTInjector
             while (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.X))
             {
 
-                List<byte[]> arrayList = createData();
+                List<string> arrayList = createData();
                 DateTime startTime = DateTime.Now;
 
 
@@ -49,7 +53,7 @@ namespace LTInjector
                 foreach (byte[] body in arrayList)
                 {
                     listCount++;
-                    rabbitMQSender.Send(body);
+                    //rabbitMQSender.Send(body);
 
                 }
 
@@ -68,17 +72,62 @@ namespace LTInjector
 
                 secondsCounter++;
 
-                Console.WriteLine("Processed {0} during {1} seconds", listCount * secondsCounter, secondsCounter);
+                Console.WriteLine("Processed {0} during {1} seconds, expected alerts {2}", listCount * secondsCounter, secondsCounter,alertscounter);
+
+
+
+            }
+        }*/
+        public void send2Reddis()
+        {
+
+            int secondsCounter = 0;
+
+            reddis.connect();
+
+            while (!(Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.X))
+            {
+
+                List<string> arrayList = createData();
+                DateTime startTime = DateTime.Now;
+
+
+                // Console.WriteLine("arrayList " + arrayList.Count);
+                int listCount = 0;
+                foreach(string body in arrayList)
+                {
+                    listCount++;
+                    reddis.push2List("flightList",body);
+                   // rabbitMQSender.Send(body);
+
+                }
+
+                DateTime endTime = DateTime.Now;
+
+                TimeSpan ts = (endTime - startTime);
+
+                Console.WriteLine("Elapsed Time is {0} ms", ts.TotalMilliseconds);
+
+                if (ts.TotalMilliseconds < 1000)
+                {
+                    int ms = (int)Math.Round((1000 - ts.TotalMilliseconds), 0);
+                    Console.WriteLine("going to sleep for {0} milliseconds", ms);
+                    Thread.Sleep(ms);
+                }
+
+                secondsCounter++;
+
+                Console.WriteLine("Processed {0} during {1} seconds, expected alerts {2}", listCount * secondsCounter, secondsCounter, alertscounter);
 
 
 
             }
         }
 
-        private  List<byte[]> createData()
+        private  List<string> createData()
         {
 
-            List<byte[]> arrayList = new List<byte[]>();
+            List<string> arrayList = new List<string>();
 
 
             int intPointsIndex = 0;
@@ -94,11 +143,14 @@ namespace LTInjector
                 if ((id % 15) == 0)
                 {
                     newZ = 1001;
+                    alertscounter++;
                 }
                 else if ((id % 10) == 0)
                 {
                     newX = 42;
                     newY = 42;
+                    alertscounter++;
+
                 }
                 else if ((id % 5) == 0)
                 {
@@ -111,6 +163,8 @@ namespace LTInjector
                     {
                         intPointsIndex = 0;
                     }
+                    alertscounter++;
+
                 }
                 else
                 {
@@ -136,8 +190,8 @@ namespace LTInjector
                 flightJson.Add("speed", speed);
                 // Console.WriteLine(flightJson.ToString());
 
-                byte[] body = Encoding.Default.GetBytes(flightJson.ToString());
-                arrayList.Add(body);
+               // byte[] body = Encoding.Default.GetBytes(flightJson.ToString());
+                arrayList.Add(flightJson.ToString());
             }
 
             return arrayList;
