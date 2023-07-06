@@ -1,4 +1,4 @@
-﻿using LTInjector.RabbitMQ;
+using LTInjector.RabbitMQ;
 using System;
 using System.Collections;
 using System.Collections.Generic;
