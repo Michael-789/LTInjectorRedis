@@ -1,4 +1,10 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
+using StackExchange.Redis;
+using NRedisStack;
+using NRedisStack.RedisStackCommands;
+using NRedisStack.Search;
+using NRedisStack.Search.Aggregation;
+using NRedisStack.Search.Literals.Enums;
 using StackExchange.Redis;
 
 namespace LTInjector
@@ -21,6 +27,14 @@ namespace LTInjector
             db.ListRightPush(listName, json);
         }
 
+        public void send2Set(string key, string json)
+        {
+            //db.StringSet(key, json);
+            db.StringAppend(key, json);
+            var ft = db.FT();
+            //RPUSH myKey '{"key":"value"}'
+           // ft.Create()
+        }
         public void popFromList(string listName)
         {
             while (true)
