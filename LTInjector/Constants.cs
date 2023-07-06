@@ -16,6 +16,14 @@ namespace LTInjector
         public static readonly string SENDER = "SENDER";
         public static readonly string RECIEVER = "RECIEVER";
 
+         //FLIGHT COORDINATES
+        public static double  XSTART = 0.0;
+        public static double  YSTART = 0.0;
+        public static double  XEND = 2.0;
+        public static double  YEND = 2.0;
+
+        public static readonly int TRACKPERIOD = 10;
+
 
     }
 
